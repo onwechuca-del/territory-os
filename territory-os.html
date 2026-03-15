@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TERRITORY">
+<meta name="theme-color" content="#0a0a0a">
+<title>TERRITORY OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --border: #222222;
+  --text: #e8e4dc;
+  --muted: #555555;
+  --accent: #c8f047;
+  --accent2: #f04747;
+  --accent3: #47b4f0;
+  --gold: #f0c447;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  overflow: hidden;
+}
+
+/* ── INSTALL BANNER ── */
+#install-banner {
+  display: none;
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 16px);
+  left: 16px; right: 16px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 14px 20px;
+  border-radius: 4px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  animation: slideUp 0.4s ease;
+}
+#install-banner.hidden { display: none !important; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ── LAYOUT ── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.logo span { color: var(--accent); }
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.date-display {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.streak-badge {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 12px 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  position: relative;
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tab-btn .tab-icon {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 3px;
+}
+
+/* ── CONTENT ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.section-sub {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.card.green::before { background: var(--accent); }
+.card.red::before { background: var(--accent2); }
+.card.blue::before { background: var(--accent3); }
+.card.gold::before { background: var(--gold); }
+
+.card-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ── DAG TAB ── */
+.priorities-list { list-style: none; margin-bottom: 16px; }
+
+.priority-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.priority-item:last-child { border-bottom: none; }
+
+.priority-check {
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 2px;
+  background: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  color: transparent;
+}
+
+.priority-check.done {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.priority-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+  outline: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  caret-color: var(--accent);
+}
+
+.priority-text.done-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.priority-text::placeholder { color: var(--muted); font-style: italic; }
+
+.time-blocks { display: flex; flex-direction: column; gap: 6px; }
+
+.time-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.time-block:hover { border-color: var(--muted); }
+.time-block.active-block { border-color: var(--accent); }
+
+.block-time {
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 70px;
+  letter-spacing: 0.05em;
+}
+
+.block-label {
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+}
+
+.block-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green { background: var(--accent); }
+.dot-red { background: var(--accent2); }
+.dot-blue { background: var(--accent3); }
+.dot-gold { background: var(--gold); }
+.dot-muted { background: var(--muted); }
+
+/* Check-in */
+.checkin-form { display: flex; flex-direction: column; gap: 10px; }
+
+.checkin-label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.score-row {
+  display: flex;
+  gap: 8px;
+}
+
+.score-btn {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.score-btn.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  font-weight: 500;
+}
+
+textarea.field {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 3px;
+  width: 100%;
+  resize: none;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+  min-height: 72px;
+}
+
+textarea.field:focus { border-color: var(--accent); }
+textarea.field::placeholder { color: var(--muted); font-style: italic; }
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.15em;
+  padding: 14px 24px;
+  border-radius: 3px;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 10px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.btn-secondary:hover { border-color: var(--muted); }
+
+/* ── GELD TAB ── */
+.balance-display {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.balance-amount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.balance-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.sources-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.source-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px;
+  text-align: center;
+}
+
+.source-name {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.source-amount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.source-input {
+  background: none;
+  border: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--text);
+  width: 100%;
+  text-align: center;
+  outline: none;
+  caret-color: var(--accent);
+}
+
+.source-input::placeholder { color: var(--muted); font-size: 16px; }
+
+.transaction-list { display: flex; flex-direction: column; gap: 6px; }
+
+.tx-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.tx-desc { font-size: 12px; color: var(--text); }
+.tx-cat { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.1em; }
+.tx-amount { font-family: 'Bebas Neue', sans-serif; font-size: 18px; }
+.tx-amount.pos { color: var(--accent); }
+.tx-amount.neg { color: var(--accent2); }
+
+.add-tx-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+input.field {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input.field:focus { border-color: var(--accent); }
+input.field::placeholder { color: var(--muted); }
+
+select.field {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.budget-bars { display: flex; flex-direction: column; gap: 10px; }
+
+.budget-row { display: flex; flex-direction: column; gap: 4px; }
+
+.budget-row-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.budget-name { color: var(--text); }
+.budget-nums { color: var(--muted); }
+
+.bar-track {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.bar-ok { background: var(--accent); }
+.bar-warn { background: var(--gold); }
+.bar-over { background: var(--accent2); }
+
+/* ── PROJECTS TAB ── */
+.project-section { margin-bottom: 20px; }
+
+.project-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.project-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.1em;
+}
+
+.project-badge {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+.badge-green { background: rgba(200,240,71,0.15); color: var(--accent); border: 1px solid rgba(200,240,71,0.3); }
+.badge-blue { background: rgba(71,180,240,0.15); color: var(--accent3); border: 1px solid rgba(71,180,240,0.3); }
+
+.task-list { display: flex; flex-direction: column; gap: 6px; }
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.task-check {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 2px;
+  background: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.2s;
+  color: transparent;
+}
+
+.task-check.done { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+.task-content { flex: 1; }
+.task-text { font-size: 12px; line-height: 1.4; }
+.task-text.done-text { text-decoration: line-through; color: var(--muted); }
+.task-deadline { font-size: 10px; color: var(--muted); margin-top: 3px; letter-spacing: 0.08em; }
+.task-deadline.urgent { color: var(--accent2); }
+
+.add-task-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ── SKILLS TAB ── */
+.skill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+
+.skill-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px;
+}
+
+.skill-icon { font-size: 22px; margin-bottom: 8px; }
+.skill-name { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.skill-score {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.skill-score.green { color: var(--accent); }
+.skill-score.gold { color: var(--gold); }
+.skill-score.blue { color: var(--accent3); }
+.skill-score.red { color: var(--accent2); }
+
+.mini-bar-track {
+  height: 3px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.weekly-review { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 14px; }
+
+.review-question { font-size: 12px; color: var(--text); margin-bottom: 8px; line-height: 1.5; }
+
+.week-scores { display: flex; gap: 4px; margin-bottom: 16px; }
+
+.day-score {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.day-label { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
+
+.day-bar-track {
+  width: 100%;
+  height: 40px;
+  background: var(--surface);
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.day-bar-fill {
+  width: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: height 0.4s ease;
+  opacity: 0.7;
+}
+
+.day-bar-fill.today { opacity: 1; }
+
+/* ── NOTIFICATION BADGE ── */
+.notif-dot {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 6px; height: 6px;
+  background: var(--accent2);
+  border-radius: 50%;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 500;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  padding: 24px 20px calc(20px + var(--safe-bottom));
+  width: 100%;
+  max-width: 500px;
+  animation: slideUp 0.3s ease;
+}
+
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 70px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 10px 20px;
+  border-radius: 20px;
+  z-index: 999;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── PROGRESS RING ── */
+.progress-ring-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0 16px;
+}
+
+.ring-label {
+  text-align: center;
+  margin-left: 16px;
+}
+
+.ring-percent {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.ring-sub {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">TERRI<span>T</span>ORY</div>
+    <div class="header-right">
+      <div class="date-display" id="headerDate">—</div>
+      <div class="streak-badge" id="streakBadge">▲ 0 DAY STREAK</div>
+    </div>
+  </div>
+
+  <!-- NAV TABS -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('dag')" id="tab-dag">
+      <span class="tab-icon">⚡</span>DAG
+    </button>
+    <button class="tab-btn" onclick="switchTab('geld')" id="tab-geld">
+      <span class="tab-icon">💰</span>GELD
+    </button>
+    <button class="tab-btn" onclick="switchTab('projects')" id="tab-projects">
+      <span class="tab-icon">🎯</span>BUILDS
+    </button>
+    <button class="tab-btn" onclick="switchTab('skills')" id="tab-skills">
+      <span class="tab-icon">📈</span>SKILLS
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══ DAG TAB ═══ -->
+    <div class="tab-panel active" id="panel-dag">
+
+      <div class="section-title">TODAY</div>
+      <div class="section-sub" id="dagSubtitle">Wat zijn jouw 3 moves vandaag?</div>
+
+      <!-- 3 Priorities -->
+      <div class="card green" style="margin-bottom:12px">
+        <div class="card-label">TOP 3 PRIORITIES</div>
+        <ul class="priorities-list" id="priorityList">
+          <li class="priority-item">
+            <button class="priority-check" onclick="togglePriority(this)">✓</button>
+            <input class="priority-text" placeholder="Priority 1..." oninput="savePriorities()" />
+          </li>
+          <li class="priority-item">
+            <button class="priority-check" onclick="togglePriority(this)">✓</button>
+            <input class="priority-text" placeholder="Priority 2..." oninput="savePriorities()" />
+          </li>
+          <li class="priority-item">
+            <button class="priority-check" onclick="togglePriority(this)">✓</button>
+            <input class="priority-text" placeholder="Priority 3..." oninput="savePriorities()" />
+          </li>
+        </ul>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="progress-ring-container">
+            <svg width="52" height="52" viewBox="0 0 52 52">
+              <circle cx="26" cy="26" r="22" fill="none" stroke="#1a1a1a" stroke-width="4"/>
+              <circle id="progressRing" cx="26" cy="26" r="22" fill="none" stroke="#c8f047" stroke-width="4"
+                stroke-dasharray="138.2" stroke-dashoffset="138.2" stroke-linecap="round"
+                transform="rotate(-90 26 26)" style="transition: stroke-dashoffset 0.4s ease;"/>
+            </svg>
+          </div>
+          <div class="ring-label">
+            <div class="ring-percent" id="ringPercent">0%</div>
+            <div class="ring-sub">GEDAAN</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time blocks -->
+      <div class="card blue">
+        <div class="card-label">DAGSTRUCTUUR</div>
+        <div class="time-blocks">
+          <div class="time-block" id="block-0">
+            <span class="block-time">06:00–08:00</span>
+            <span class="block-label">Morning ritual + sport</span>
+            <span class="block-dot dot-blue"></span>
+          </div>
+          <div class="time-block" id="block-1">
+            <span class="block-time">08:00–12:00</span>
+            <span class="block-label">Deep work — builds</span>
+            <span class="block-dot dot-green"></span>
+          </div>
+          <div class="time-block" id="block-2">
+            <span class="block-time">12:00–13:00</span>
+            <span class="block-label">Lunch + reset</span>
+            <span class="block-dot dot-muted"></span>
+          </div>
+          <div class="time-block" id="block-3">
+            <span class="block-time">13:00–17:00</span>
+            <span class="block-label">Gaele / calls / admin</span>
+            <span class="block-dot dot-gold"></span>
+          </div>
+          <div class="time-block" id="block-4">
+            <span class="block-time">17:00–19:00</span>
+            <span class="block-label">DW8 creative werk</span>
+            <span class="block-dot dot-green"></span>
+          </div>
+          <div class="time-block" id="block-5">
+            <span class="block-time">20:00–21:00</span>
+            <span class="block-label">Avond review + plan morgen</span>
+            <span class="block-dot dot-blue"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avond check-in -->
+      <div class="card gold" style="margin-top:12px">
+        <div class="card-label">AVOND CHECK-IN</div>
+        <div class="checkin-form">
+          <div>
+            <div class="checkin-label">Score van vandaag (1–10)</div>
+            <div class="score-row" id="scoreRow">
+              <button class="score-btn" onclick="setScore(1)">1</button>
+              <button class="score-btn" onclick="setScore(2)">2</button>
+              <button class="score-btn" onclick="setScore(3)">3</button>
+              <button class="score-btn" onclick="setScore(4)">4</button>
+              <button class="score-btn" onclick="setScore(5)">5</button>
+              <button class="score-btn" onclick="setScore(6)">6</button>
+              <button class="score-btn" onclick="setScore(7)">7</button>
+              <button class="score-btn" onclick="setScore(8)">8</button>
+              <button class="score-btn" onclick="setScore(9)">9</button>
+              <button class="score-btn" onclick="setScore(10)">10</button>
+            </div>
+          </div>
+          <div>
+            <div class="checkin-label">Wat ging goed?</div>
+            <textarea class="field" id="checkinGoed" placeholder="..." rows="2" oninput="saveCheckin()"></textarea>
+          </div>
+          <div>
+            <div class="checkin-label">Wat had beter gekund?</div>
+            <textarea class="field" id="checkinBeter" placeholder="..." rows="2" oninput="saveCheckin()"></textarea>
+          </div>
+          <div>
+            <div class="checkin-label">Morgen ga ik focussen op...</div>
+            <textarea class="field" id="checkinMorgen" placeholder="..." rows="2" oninput="saveCheckin()"></textarea>
+          </div>
+          <button class="btn-primary" onclick="submitCheckin()">CHECK-IN OPSLAAN ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ GELD TAB ═══ -->
+    <div class="tab-panel" id="panel-geld">
+
+      <div class="section-title">TREASURY</div>
+      <div class="section-sub">Maand overzicht — alle bronnen</div>
+
+      <div class="card green">
+        <div class="card-label">TOTAAL DEZE MAAND</div>
+        <div class="balance-display">
+          <div class="balance-amount" id="totalBalance">€ 0</div>
+          <div class="balance-label">NETTO INKOMSTEN</div>
+        </div>
+        <div class="sources-grid">
+          <div class="source-card">
+            <div class="source-name">GAELE</div>
+            <input class="source-input" id="gaeleIncome" type="number" placeholder="0" oninput="updateTotal()" />
+          </div>
+          <div class="source-card">
+            <div class="source-name">LADBROKES</div>
+            <input class="source-input" id="lbIncome" type="number" placeholder="0" oninput="updateTotal()" />
+          </div>
+          <div class="source-card">
+            <div class="source-name">DW8</div>
+            <input class="source-input" id="dw8Income" type="number" placeholder="0" oninput="updateTotal()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget bars -->
+      <div class="card red">
+        <div class="card-label">BUDGET CONTROLE</div>
+        <div class="budget-bars" id="budgetBars">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- Add transaction -->
+      <div class="card blue">
+        <div class="card-label">TRANSACTIE TOEVOEGEN</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+          <input class="field" id="txDesc" placeholder="Omschrijving..." style="width:100%;" />
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <input class="field" id="txAmount" type="number" placeholder="Bedrag" />
+            <select class="field" id="txType">
+              <option value="uit">— Uitgave</option>
+              <option value="in">+ Inkomst</option>
+            </select>
+          </div>
+          <select class="field" id="txCat" style="width:100%;">
+            <option value="leven">Levenskosten</option>
+            <option value="business">Business</option>
+            <option value="dw8">DW8</option>
+            <option value="gaele">Gaele</option>
+            <option value="fun">Fun / uitgaan</option>
+            <option value="sparen">Sparen / assets</option>
+          </select>
+          <button class="btn-primary" onclick="addTransaction()">TOEVOEGEN</button>
+        </div>
+      </div>
+
+      <!-- Transaction list -->
+      <div class="card" style="margin-top:0;">
+        <div class="card-label">RECENTE TRANSACTIES</div>
+        <div class="transaction-list" id="txList">
+          <div style="color:var(--muted); font-size:12px; padding:8px 0; font-style:italic;">Nog geen transacties...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROJECTS TAB ═══ -->
+    <div class="tab-panel" id="panel-projects">
+
+      <div class="section-title">BUILDS</div>
+      <div class="section-sub">DW8 · Gaele · Persoonlijk</div>
+
+      <!-- DW8 -->
+      <div class="project-section">
+        <div class="project-header">
+          <div class="project-name" style="color:var(--accent);">DW8</div>
+          <span class="project-badge badge-green">DROP 1 · JUNI 2026</span>
+        </div>
+        <div class="task-list" id="dw8Tasks"></div>
+        <div class="add-task-row" style="margin-top:8px;">
+          <input class="field" id="dw8TaskInput" placeholder="Nieuwe taak..." style="flex:1;" onkeydown="if(event.key==='Enter') addTask('dw8')" />
+          <input class="field" id="dw8DeadlineInput" type="date" style="width:130px;" />
+          <button class="btn-secondary" onclick="addTask('dw8')">+</button>
+        </div>
+      </div>
+
+      <div style="height:1px; background:var(--border); margin:16px 0;"></div>
+
+      <!-- Gaele -->
+      <div class="project-section">
+        <div class="project-header">
+          <div class="project-name" style="color:var(--accent3);">GAELE</div>
+          <span class="project-badge badge-blue">ENERGIE · ACTIEF</span>
+        </div>
+        <div class="task-list" id="gaeleTasks"></div>
+        <div class="add-task-row" style="margin-top:8px;">
+          <input class="field" id="gaeleTaskInput" placeholder="Nieuwe taak..." style="flex:1;" onkeydown="if(event.key==='Enter') addTask('gaele')" />
+          <input class="field" id="gaeleDeadlineInput" type="date" style="width:130px;" />
+          <button class="btn-secondary" onclick="addTask('gaele')">+</button>
+        </div>
+      </div>
+
+      <div style="height:1px; background:var(--border); margin:16px 0;"></div>
+
+      <!-- Personal -->
+      <div class="project-section">
+        <div class="project-header">
+          <div class="project-name" style="color:var(--gold);">PERSOONLIJK</div>
+          <span class="project-badge" style="background:rgba(240,196,71,0.15); color:var(--gold); border:1px solid rgba(240,196,71,0.3);">GROEI</span>
+        </div>
+        <div class="task-list" id="persoonlijkTasks"></div>
+        <div class="add-task-row" style="margin-top:8px;">
+          <input class="field" id="persoonlijkTaskInput" placeholder="Nieuwe taak..." style="flex:1;" onkeydown="if(event.key==='Enter') addTask('persoonlijk')" />
+          <input class="field" id="persoonlijkDeadlineInput" type="date" style="width:130px;" />
+          <button class="btn-secondary" onclick="addTask('persoonlijk')">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SKILLS TAB ═══ -->
+    <div class="tab-panel" id="panel-skills">
+
+      <div class="section-title">DISCIPLINE</div>
+      <div class="section-sub">Jouw 4 kerngebieden — Brian Tracy</div>
+
+      <div class="skill-grid">
+        <div class="skill-card">
+          <div class="skill-icon">🔥</div>
+          <div class="skill-name">PERSISTENCE</div>
+          <div class="skill-score green" id="skill-persistence">--</div>
+          <div class="mini-bar-track">
+            <div class="mini-bar-fill bar-ok" id="bar-persistence" style="width:0%; background:var(--accent);"></div>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">🤝</div>
+          <div class="skill-name">NETWERKEN</div>
+          <div class="skill-score blue" id="skill-netwerken">--</div>
+          <div class="mini-bar-track">
+            <div class="mini-bar-fill" id="bar-netwerken" style="width:0%; background:var(--accent3);"></div>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">👑</div>
+          <div class="skill-name">LEADERSHIP</div>
+          <div class="skill-score gold" id="skill-leadership">--</div>
+          <div class="mini-bar-track">
+            <div class="mini-bar-fill" id="bar-leadership" style="width:0%; background:var(--gold);"></div>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">💰</div>
+          <div class="skill-name">GELD MGMT</div>
+          <div class="skill-score red" id="skill-geld">--</div>
+          <div class="mini-bar-track">
+            <div class="mini-bar-fill" id="bar-geld" style="width:0%; background:var(--accent2);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self-score today -->
+      <div class="card gold">
+        <div class="card-label">SCORE JEZELF VANDAAG</div>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+          <div>
+            <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">PERSISTENCE (doorzetten)</div>
+            <div class="score-row" id="scoreP">
+              <button class="score-btn" onclick="setSkillScore('persistence',1,this)">1</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',2,this)">2</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',3,this)">3</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',4,this)">4</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',5,this)">5</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',6,this)">6</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',7,this)">7</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',8,this)">8</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',9,this)">9</button>
+              <button class="score-btn" onclick="setSkillScore('persistence',10,this)">10</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">GELD MANAGEMENT</div>
+            <div class="score-row" id="scoreG">
+              <button class="score-btn" onclick="setSkillScore('geld',1,this)">1</button>
+              <button class="score-btn" onclick="setSkillScore('geld',2,this)">2</button>
+              <button class="score-btn" onclick="setSkillScore('geld',3,this)">3</button>
+              <button class="score-btn" onclick="setSkillScore('geld',4,this)">4</button>
+              <button class="score-btn" onclick="setSkillScore('geld',5,this)">5</button>
+              <button class="score-btn" onclick="setSkillScore('geld',6,this)">6</button>
+              <button class="score-btn" onclick="setSkillScore('geld',7,this)">7</button>
+              <button class="score-btn" onclick="setSkillScore('geld',8,this)">8</button>
+              <button class="score-btn" onclick="setSkillScore('geld',9,this)">9</button>
+              <button class="score-btn" onclick="setSkillScore('geld',10,this)">10</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Week chart -->
+      <div class="card blue" style="margin-top:12px;">
+        <div class="card-label">WEEK OVERZICHT — CHECK-IN SCORES</div>
+        <div class="week-scores" id="weekScores">
+          <!-- JS generated -->
+        </div>
+        <div class="weekly-review">
+          <div class="review-question">Ben ik dichter bij mijn ideale leven dan vorige week?</div>
+          <div class="score-row" id="weekReviewScore">
+            <button class="score-btn" onclick="setWeekReview(1,this)">1</button>
+            <button class="score-btn" onclick="setWeekReview(2,this)">2</button>
+            <button class="score-btn" onclick="setWeekReview(3,this)">3</button>
+            <button class="score-btn" onclick="setWeekReview(4,this)">4</button>
+            <button class="score-btn" onclick="setWeekReview(5,this)">5</button>
+          </div>
+          <textarea class="field" id="weekReviewText" placeholder="Weekly reflectie..." style="margin-top:10px;" rows="3" oninput="saveWeekReview()"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner" class="hidden">
+  📲 Installeer TERRITORY op je telefoon
+  <button onclick="installPWA()" style="background:var(--bg); color:var(--accent); border:none; font-family:'IBM Plex Mono',monospace; font-size:11px; padding:6px 12px; border-radius:3px; cursor:pointer; font-weight:500;">INSTALL</button>
+  <button onclick="document.getElementById('install-banner').classList.add('hidden')" style="background:none; border:none; color:var(--bg); font-size:16px; cursor:pointer; margin-left:4px;">✕</button>
+</div>
+
+<script>
+// ── STATE ──
+let state = {
+  priorities: [{text:'',done:false},{text:'',done:false},{text:'',done:false}],
+  checkin: { score: null, goed: '', beter: '', morgen: '' },
+  checkinHistory: {},
+  transactions: [],
+  income: { gaele: 0, lb: 0, dw8: 0 },
+  tasks: { dw8: [], gaele: [], persoonlijk: [] },
+  skills: { persistence: [], netwerken: [], leadership: [], geld: [] },
+  skillToday: { persistence: null, netwerken: null, leadership: null, geld: null },
+  weekReview: { score: null, text: '' },
+  streak: 0,
+  budgets: [
+    { name: 'Levenskosten', limit: 1200, cat: 'leven' },
+    { name: 'Business', limit: 500, cat: 'business' },
+    { name: 'DW8 investering', limit: 800, cat: 'dw8' },
+    { name: 'Fun / uitgaan', limit: 200, cat: 'fun' },
+    { name: 'Sparen / assets', limit: 300, cat: 'sparen' },
+  ]
+};
+
+const TODAY = new Date().toISOString().split('T')[0];
+
+// ── LOAD / SAVE ──
+function load() {
+  const saved = localStorage.getItem('territory_os_v2');
+  if (saved) {
+    try { Object.assign(state, JSON.parse(saved)); } catch(e) {}
+  }
+  // Reset daily if new day
+  if (state.lastDay !== TODAY) {
+    if (state.lastDay && state.checkin.score) {
+      state.streak = (state.streak || 0) + 1;
+      // archive yesterday
+      if (!state.checkinHistory) state.checkinHistory = {};
+      state.checkinHistory[state.lastDay] = {...state.checkin};
+    }
+    state.priorities = [{text:'',done:false},{text:'',done:false},{text:'',done:false}];
+    state.checkin = { score: null, goed: '', beter: '', morgen: '' };
+    state.skillToday = { persistence: null, netwerken: null, leadership: null, geld: null };
+    state.lastDay = TODAY;
+    save();
+  }
+}
+
+function save() {
+  localStorage.setItem('territory_os_v2', JSON.stringify(state));
+}
+
+// ── INIT ──
+function init() {
+  load();
+  updateHeader();
+  renderPriorities();
+  renderCheckin();
+  updateTotal();
+  renderBudgets();
+  renderTransactions();
+  renderTasks('dw8');
+  renderTasks('gaele');
+  renderTasks('persoonlijk');
+  renderSkills();
+  renderWeekChart();
+  highlightCurrentBlock();
+  setInterval(highlightCurrentBlock, 60000);
+}
+
+function updateHeader() {
+  const days = ['ZO','MA','DI','WO','DO','VR','ZA'];
+  const months = ['JAN','FEB','MAR','APR','MEI','JUN','JUL','AUG','SEP','OKT','NOV','DEC'];
+  const d = new Date();
+  document.getElementById('headerDate').textContent = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('streakBadge').textContent = `▲ ${state.streak || 0} DAY STREAK`;
+}
+
+// ── TABS ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ── PRIORITIES ──
+function renderPriorities() {
+  const list = document.getElementById('priorityList');
+  const items = list.querySelectorAll('.priority-item');
+  items.forEach((item, i) => {
+    const p = state.priorities[i];
+    const check = item.querySelector('.priority-check');
+    const input = item.querySelector('.priority-text');
+    input.value = p.text;
+    check.classList.toggle('done', p.done);
+    input.classList.toggle('done-text', p.done);
+  });
+  updateRing();
+}
+
+function togglePriority(btn) {
+  const item = btn.parentElement;
+  const idx = Array.from(item.parentElement.children).indexOf(item);
+  state.priorities[idx].done = !state.priorities[idx].done;
+  btn.classList.toggle('done');
+  item.querySelector('.priority-text').classList.toggle('done-text');
+  save();
+  updateRing();
+}
+
+function savePriorities() {
+  const items = document.querySelectorAll('#priorityList .priority-item');
+  items.forEach((item, i) => {
+    state.priorities[i].text = item.querySelector('.priority-text').value;
+  });
+  save();
+}
+
+function updateRing() {
+  const done = state.priorities.filter(p => p.done).length;
+  const total = 3;
+  const pct = Math.round((done / total) * 100);
+  const circ = 138.2;
+  const offset = circ - (circ * done / total);
+  document.getElementById('progressRing').style.strokeDashoffset = offset;
+  document.getElementById('ringPercent').textContent = pct + '%';
+}
+
+// ── CHECKIN ──
+function renderCheckin() {
+  document.getElementById('checkinGoed').value = state.checkin.goed || '';
+  document.getElementById('checkinBeter').value = state.checkin.beter || '';
+  document.getElementById('checkinMorgen').value = state.checkin.morgen || '';
+  if (state.checkin.score) {
+    document.querySelectorAll('#scoreRow .score-btn')[state.checkin.score - 1]?.classList.add('selected');
+  }
+}
+
+function setScore(n) {
+  document.querySelectorAll('#scoreRow .score-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('#scoreRow .score-btn')[n-1].classList.add('selected');
+  state.checkin.score = n;
+  save();
+}
+
+function saveCheckin() {
+  state.checkin.goed = document.getElementById('checkinGoed').value;
+  state.checkin.beter = document.getElementById('checkinBeter').value;
+  state.checkin.morgen = document.getElementById('checkinMorgen').value;
+  save();
+}
+
+function submitCheckin() {
+  saveCheckin();
+  if (!state.checkinHistory) state.checkinHistory = {};
+  state.checkinHistory[TODAY] = {...state.checkin};
+  save();
+  showToast('Check-in opgeslagen ✓');
+  renderWeekChart();
+}
+
+// ── TIME BLOCKS ──
+function highlightCurrentBlock() {
+  const h = new Date().getHours();
+  const blocks = [
+    { id: 'block-0', start: 6, end: 8 },
+    { id: 'block-1', start: 8, end: 12 },
+    { id: 'block-2', start: 12, end: 13 },
+    { id: 'block-3', start: 13, end: 17 },
+    { id: 'block-4', start: 17, end: 19 },
+    { id: 'block-5', start: 20, end: 21 },
+  ];
+  blocks.forEach(b => {
+    const el = document.getElementById(b.id);
+    if (el) el.classList.toggle('active-block', h >= b.start && h < b.end);
+  });
+}
+
+// ── GELD ──
+function updateTotal() {
+  const g = parseFloat(document.getElementById('gaeleIncome').value) || 0;
+  const l = parseFloat(document.getElementById('lbIncome').value) || 0;
+  const d = parseFloat(document.getElementById('dw8Income').value) || 0;
+  state.income = { gaele: g, lb: l, dw8: d };
+  const total = g + l + d;
+  document.getElementById('totalBalance').textContent = '€ ' + total.toLocaleString('nl-BE');
+  save();
+  renderBudgets();
+}
+
+function renderBudgets() {
+  const container = document.getElementById('budgetBars');
+  container.innerHTML = '';
+  state.budgets.forEach(b => {
+    const spent = state.transactions
+      .filter(t => t.cat === b.cat && t.type === 'uit')
+      .reduce((s, t) => s + t.amount, 0);
+    const pct = Math.min(100, Math.round((spent / b.limit) * 100));
+    const cls = pct < 70 ? 'bar-ok' : pct < 95 ? 'bar-warn' : 'bar-over';
+    container.innerHTML += `
+      <div class="budget-row">
+        <div class="budget-row-header">
+          <span class="budget-name">${b.name}</span>
+          <span class="budget-nums">€${spent} / €${b.limit}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill ${cls}" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  });
+}
+
+function addTransaction() {
+  const desc = document.getElementById('txDesc').value.trim();
+  const amount = parseFloat(document.getElementById('txAmount').value);
+  const type = document.getElementById('txType').value;
+  const cat = document.getElementById('txCat').value;
+  if (!desc || !amount) return;
+  state.transactions.unshift({ desc, amount, type, cat, date: TODAY });
+  document.getElementById('txDesc').value = '';
+  document.getElementById('txAmount').value = '';
+  save();
+  renderTransactions();
+  renderBudgets();
+  showToast('Transactie toegevoegd');
+}
+
+function renderTransactions() {
+  const list = document.getElementById('txList');
+  if (!state.transactions.length) {
+    list.innerHTML = '<div style="color:var(--muted); font-size:12px; padding:8px 0; font-style:italic;">Nog geen transacties...</div>';
+    return;
+  }
+  list.innerHTML = state.transactions.slice(0,15).map((t,i) => `
+    <div class="tx-item">
+      <div>
+        <div class="tx-desc">${t.desc}</div>
+        <div class="tx-cat">${t.cat.toUpperCase()} · ${t.date}</div>
+      </div>
+      <div>
+        <div class="tx-amount ${t.type === 'in' ? 'pos' : 'neg'}">${t.type === 'in' ? '+' : '-'}€${t.amount}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── TASKS ──
+function renderTasks(project) {
+  const container = document.getElementById(project + 'Tasks');
+  const tasks = state.tasks[project] || [];
+  if (!tasks.length) {
+    container.innerHTML = '<div style="color:var(--muted); font-size:12px; padding:6px 0; font-style:italic;">Nog geen taken...</div>';
+    return;
+  }
+  const today = new Date();
+  container.innerHTML = tasks.map((t, i) => {
+    const isUrgent = t.deadline && new Date(t.deadline) <= new Date(today.getTime() + 3*24*60*60*1000);
+    return `
+    <div class="task-item">
+      <button class="task-check ${t.done ? 'done' : ''}" onclick="toggleTask('${project}',${i})">${t.done ? '✓' : ''}</button>
+      <div class="task-content">
+        <div class="task-text ${t.done ? 'done-text' : ''}">${t.text}</div>
+        ${t.deadline ? `<div class="task-deadline ${isUrgent && !t.done ? 'urgent' : ''}">📅 ${t.deadline}</div>` : ''}
+      </div>
+      <button onclick="deleteTask('${project}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px;">×</button>
+    </div>`;
+  }).join('');
+}
+
+function addTask(project) {
+  const input = document.getElementById(project + 'TaskInput');
+  const deadlineInput = document.getElementById(project + 'DeadlineInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!state.tasks[project]) state.tasks[project] = [];
+  state.tasks[project].push({ text, done: false, deadline: deadlineInput.value || '' });
+  input.value = '';
+  deadlineInput.value = '';
+  save();
+  renderTasks(project);
+  showToast('Taak toegevoegd');
+}
+
+function toggleTask(project, idx) {
+  state.tasks[project][idx].done = !state.tasks[project][idx].done;
+  save();
+  renderTasks(project);
+}
+
+function deleteTask(project, idx) {
+  state.tasks[project].splice(idx, 1);
+  save();
+  renderTasks(project);
+}
+
+// ── SKILLS ──
+function setSkillScore(skill, val, btn) {
+  const rowId = skill === 'persistence' ? 'scoreP' : 'scoreG';
+  document.querySelectorAll('#' + rowId + ' .score-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.skillToday[skill] = val;
+  // push to history
+  if (!state.skills[skill]) state.skills[skill] = [];
+  const existing = state.skills[skill].findIndex(s => s.date === TODAY);
+  if (existing >= 0) state.skills[skill][existing].score = val;
+  else state.skills[skill].push({ date: TODAY, score: val });
+  save();
+  renderSkills();
+  showToast(`${skill.charAt(0).toUpperCase() + skill.slice(1)}: ${val}/10`);
+}
+
+function renderSkills() {
+  ['persistence','netwerken','leadership','geld'].forEach(skill => {
+    const history = state.skills[skill] || [];
+    const recent = history.slice(-7);
+    const avg = recent.length ? Math.round(recent.reduce((s,r) => s+r.score,0) / recent.length) : null;
+    document.getElementById('skill-' + skill).textContent = avg !== null ? avg + '/10' : '--';
+    document.getElementById('bar-' + skill).style.width = avg !== null ? (avg * 10) + '%' : '0%';
+  });
+}
+
+// ── WEEK CHART ──
+function renderWeekChart() {
+  const container = document.getElementById('weekScores');
+  const days = ['MA','DI','WO','DO','VR','ZA','ZO'];
+  const today = new Date();
+  container.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const dayData = (state.checkinHistory || {})[key];
+    const score = dayData?.score || 0;
+    const isToday = key === TODAY;
+    const dayLabel = days[(d.getDay() + 6) % 7];
+    const heightPct = score ? (score / 10 * 100) : 5;
+    container.innerHTML += `
+      <div class="day-score">
+        <div class="day-label">${dayLabel}</div>
+        <div class="day-bar-track">
+          <div class="day-bar-fill ${isToday ? 'today' : ''}" style="height:${heightPct}%"></div>
+        </div>
+        <div class="day-label">${score || '-'}</div>
+      </div>`;
+  }
+}
+
+function setWeekReview(val, btn) {
+  document.querySelectorAll('#weekReviewScore .score-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.weekReview.score = val;
+  save();
+}
+
+function saveWeekReview() {
+  state.weekReview.text = document.getElementById('weekReviewText').value;
+  save();
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── PWA INSTALL ──
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.remove('hidden');
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-banner').classList.add('hidden');
+    });
+  }
+}
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
